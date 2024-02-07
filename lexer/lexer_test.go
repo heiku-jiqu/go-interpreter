@@ -17,6 +17,7 @@ func TestLexing(t *testing.T) {
 			{Type: token.ASSIGN, Literal: "="},
 			{Type: token.INT, Literal: "INT"},
 			{Type: token.SEMICOLON, Literal: ";"},
+			{Type: token.EOF, Literal: ""},
 		}
 		for _, expectTok := range expected {
 			tok := lexer.NextToken()
@@ -38,6 +39,7 @@ func TestLexing(t *testing.T) {
 			{Type: token.RPAREN, Literal: ")"},
 			{Type: token.COMMA, Literal: ","},
 			{Type: token.SEMICOLON, Literal: ";"},
+			{Type: token.EOF, Literal: ""},
 		}
 		for _, expectTok := range expected {
 			tok := lexer.NextToken()
