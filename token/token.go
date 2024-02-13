@@ -13,8 +13,13 @@ const (
 	EOF     TokenType = "EOF"
 
 	// Operators
-	ASSIGN TokenType = "="
-	PLUS   TokenType = "+"
+	ASSIGN      TokenType = "="
+	PLUS        TokenType = "+"
+	MINUS       TokenType = "-"
+	DIVIDE      TokenType = "/"
+	MULTIPLY    TokenType = "*"
+	GREATERTHAN TokenType = ">"
+	LESSERTHAN  TokenType = "<"
 
 	// Identifiers and Literals
 	IDENT TokenType = "IDENT"

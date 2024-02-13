@@ -65,7 +65,7 @@ let result = add(five,ten);`
 		}
 	})
 	t.Run("test symbol tokens", func(t *testing.T) {
-		input := "=+{}(),;"
+		input := "=+{}(),;-/*<>"
 		lexer := NewLexer(input)
 
 		expected := []token.Token{
@@ -77,6 +77,11 @@ let result = add(five,ten);`
 			{Type: token.RPAREN, Literal: ")"},
 			{Type: token.COMMA, Literal: ","},
 			{Type: token.SEMICOLON, Literal: ";"},
+			{Type: token.MINUS, Literal: "-"},
+			{Type: token.DIVIDE, Literal: "/"},
+			{Type: token.MULTIPLY, Literal: "*"},
+			{Type: token.LESSERTHAN, Literal: "<"},
+			{Type: token.GREATERTHAN, Literal: ">"},
 			{Type: token.EOF, Literal: ""},
 		}
 		for _, expectTok := range expected {
