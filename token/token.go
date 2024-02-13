@@ -21,6 +21,8 @@ const (
 	BANG     TokenType = "!"
 	GT       TokenType = ">"
 	LT       TokenType = "<"
+	EQ       TokenType = "=="
+	NOT_EQ   TokenType = "!="
 
 	// Identifiers and Literals
 	IDENT TokenType = "IDENT"

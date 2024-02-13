@@ -21,7 +21,10 @@ if (5 < 10) {
   return true;
 } else {
   return false;
-}`
+}
+
+10 == 10;
+10 != 9;`
 		lexer := NewLexer(input)
 
 		expected := []token.Token{
@@ -78,6 +81,14 @@ if (5 < 10) {
 			{Type: token.FALSE, Literal: "false"},
 			{Type: token.SEMICOLON, Literal: ";"},
 			{Type: token.RBRACE, Literal: "}"},
+			{Type: token.INT, Literal: "10"},
+			{Type: token.EQ, Literal: "=="},
+			{Type: token.INT, Literal: "10"},
+			{Type: token.SEMICOLON, Literal: ";"},
+			{Type: token.INT, Literal: "10"},
+			{Type: token.NOT_EQ, Literal: "!="},
+			{Type: token.INT, Literal: "9"},
+			{Type: token.SEMICOLON, Literal: ";"},
 			{Type: token.EOF, Literal: ""},
 		}
 		for _, expectTok := range expected {
@@ -106,6 +117,24 @@ if (5 < 10) {
 			{Type: token.LT, Literal: "<"},
 			{Type: token.GT, Literal: ">"},
 			{Type: token.BANG, Literal: "!"},
+			{Type: token.EOF, Literal: ""},
+		}
+		for _, expectTok := range expected {
+			tok := lexer.NextToken()
+			if tok != expectTok {
+				t.Fatalf("expected %+v but got %+v", expectTok, tok)
+			}
+		}
+	})
+	t.Run("test two char operators", func(t *testing.T) {
+		input := "10 == 10;"
+		lexer := NewLexer(input)
+
+		expected := []token.Token{
+			{Type: token.INT, Literal: "10"},
+			{Type: token.EQ, Literal: "=="},
+			{Type: token.INT, Literal: "10"},
+			{Type: token.SEMICOLON, Literal: ";"},
 			{Type: token.EOF, Literal: ""},
 		}
 		for _, expectTok := range expected {
