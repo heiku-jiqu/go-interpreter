@@ -4,9 +4,9 @@ import "github.com/heiku-jiqu/go-interpreter/token"
 
 type Lexer struct {
 	input        string
-	position     int
-	readPosition int
-	ch           byte
+	position     int  // position is the index of `ch` in `input`
+	readPosition int  // readPosition is the next index to be read in `input`
+	ch           byte // ch is the current character at index `position`
 }
 
 func NewLexer(input string) *Lexer {
