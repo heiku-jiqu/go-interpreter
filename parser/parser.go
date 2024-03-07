@@ -15,7 +15,7 @@ type Parser struct {
 	peekToken token.Token
 }
 
-func New(l *lexer.Lexer) *Parser {
+func NewParser(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l}
 
 	p.NextToken()
@@ -31,11 +31,11 @@ func (p *Parser) NextToken() {
 
 func (p *Parser) ParseProgram() *ast.Program {
 	stmts := []ast.Statement{}
-	prog := &ast.Program{Statements: stmts}
 	if p.curToken.Type == token.LET {
 		stmt := p.ParseLet()
 		stmts = append(stmts, stmt)
 	}
+	prog := &ast.Program{Statements: stmts}
 	return prog
 }
 
@@ -45,6 +45,7 @@ func (p *Parser) ParseLet() *ast.LetStatement {
 	p.NextToken()
 	identifier := ast.Identifier{
 		Token: p.curToken,
+		Value: p.curToken.Literal,
 	}
 
 	p.NextToken()
