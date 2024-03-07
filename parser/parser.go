@@ -39,7 +39,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return prog
 }
 
-func (p *Parser) ParseLet() ast.Statement {
+func (p *Parser) ParseLet() *ast.LetStatement {
 	letToken := p.curToken
 
 	p.NextToken()
