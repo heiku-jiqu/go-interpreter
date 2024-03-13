@@ -9,9 +9,10 @@ import (
 
 func TestLetStatement(t *testing.T) {
 	input := `
-	let x = 5;
-	let test = 69;
-	let elephant = 420;`
+let x = 5;
+let test = 69;
+let elephant = 420;
+`
 	l := lexer.NewLexer(input)
 	p := NewParser(l)
 	program := p.ParseProgram()
@@ -19,8 +20,8 @@ func TestLetStatement(t *testing.T) {
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != 1 {
-		t.Fatalf("program.Statements does not contain 1 statement. got %d statement(s)", len(program.Statements))
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statement. got %d statement(s)", len(program.Statements))
 	}
 
 	expecteds := []struct {

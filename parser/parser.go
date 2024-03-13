@@ -31,15 +31,25 @@ func (p *Parser) NextToken() {
 
 func (p *Parser) ParseProgram() *ast.Program {
 	stmts := []ast.Statement{}
-	if p.curToken.Type == token.LET {
-		stmt := p.ParseLet()
-		stmts = append(stmts, stmt)
+	for p.curToken.Type != token.EOF {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			stmts = append(stmts, stmt)
+		}
+		p.NextToken()
 	}
 	prog := &ast.Program{Statements: stmts}
 	return prog
 }
 
-func (p *Parser) ParseLet() *ast.LetStatement {
+func (p *Parser) parseStatement() ast.Statement {
+	if p.curToken.Type == token.LET {
+		return p.parseLet()
+	}
+	return nil
+}
+
+func (p *Parser) parseLet() *ast.LetStatement {
 	letToken := p.curToken
 
 	p.NextToken()
