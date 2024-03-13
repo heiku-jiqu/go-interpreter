@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/heiku-jiqu/go-interpreter/ast"
@@ -11,12 +12,17 @@ import (
 type Parser struct {
 	l *lexer.Lexer
 
+	errors []string
+
 	curToken  token.Token
 	peekToken token.Token
 }
 
 func NewParser(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{
+		l:      l,
+		errors: []string{},
+	}
 
 	p.NextToken()
 	p.NextToken()
@@ -63,8 +69,10 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	s.Name = identifier
 
 	// assert next token is `=` before going to next token
-	if p.peekToken.Type != token.ASSIGN {
+	if !p.peekTokenIs(token.ASSIGN) {
 		// error
+		p.peekTokenTypeError(token.ASSIGN)
+		return nil
 	}
 	p.NextToken()
 
@@ -88,4 +96,18 @@ func (p *Parser) parseExpression() ast.Expression {
 		Token: p.curToken,
 		Value: i,
 	}
+}
+
+func (p *Parser) peekTokenIs(t token.TokenType) bool {
+	return p.peekToken.Type == t
+}
+
+// Appends error mismatch TokenType message in p.errors
+func (p *Parser) peekTokenTypeError(expectedType token.TokenType) {
+	msg := fmt.Sprintf("expected next token to be %s, but got %s instead.", expectedType, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) Errors() []string {
+	return p.errors
 }
