@@ -5,11 +5,13 @@ import (
 
 	"github.com/heiku-jiqu/go-interpreter/ast"
 	"github.com/heiku-jiqu/go-interpreter/lexer"
-	"github.com/heiku-jiqu/go-interpreter/token"
 )
 
 func TestLetStatement(t *testing.T) {
-	input := "let x = 5;"
+	input := `
+	let x = 5;
+	let test = 69;
+	let elephant = 420;`
 	l := lexer.NewLexer(input)
 	p := NewParser(l)
 	program := p.ParseProgram()
@@ -21,30 +23,39 @@ func TestLetStatement(t *testing.T) {
 		t.Fatalf("program.Statements does not contain 1 statement. got %d statement(s)", len(program.Statements))
 	}
 
-	expected := &ast.LetStatement{
-		Token: token.Token{Type: token.LET, Literal: "let"},
-		Name: &ast.Identifier{
-			Token: token.Token{Type: token.IDENT, Literal: "x"},
-			Value: "x",
-		},
-		Value: &ast.IntLiteral{
-			Token: token.Token{Type: token.INT, Literal: "5"},
-			Value: 5,
-		},
+	expecteds := []struct {
+		name string
+		val  int
+	}{
+		{"x", 5},
+		{"test", 69},
+		{"elephant", 420},
 	}
-	letStmt, ok := program.Statements[0].(*ast.LetStatement)
+
+	for i, s := range program.Statements {
+		exp := expecteds[i]
+		testLetStatement(t, s, exp.name, exp.val)
+	}
+}
+
+func testLetStatement(t *testing.T, s ast.Statement, name string, expectedVal int) {
+	letStmt, ok := s.(*ast.LetStatement)
 	if !ok {
 		t.Errorf("parsed statement is not a LetStatement")
 	}
 
-	if *letStmt.Name != *expected.Name {
-		t.Errorf("invalid LetStatement.Name, got %+v, expected %+v", letStmt.Name, expected.Name)
+	if letStmt.Name.Value != name {
+		t.Errorf("invalid LetStatement.Name.Value, got %s, expected %s", letStmt.Name.Value, name)
+	}
+	if letStmt.Name.TokenLiteral() != name {
+		t.Errorf("invalid LetStatement.Name, got %s, expected %s", letStmt.Name, name)
 	}
 	letStmtValue, ok := letStmt.Value.(*ast.IntLiteral)
 	if !ok {
 		t.Errorf("parsed RHS of LetStatement is not IntLiteral")
 	}
-	if *letStmtValue != *expected.Value.(*ast.IntLiteral) {
-		t.Errorf("invalid LetStatement.Value, got %+v, expected %+v", letStmt.Value, letStmt.Value)
+
+	if letStmtValue.Value != expectedVal {
+		t.Errorf("invalid LetStatement.Value, got %+v, expected %+v", letStmtValue.Value, expectedVal)
 	}
 }
