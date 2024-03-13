@@ -43,38 +43,43 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
-	if p.curToken.Type == token.LET {
-		return p.parseLet()
+	switch p.curToken.Type {
+	case token.LET:
+		return p.parseLetStatement()
+	default:
+		return nil
 	}
-	return nil
 }
 
-func (p *Parser) parseLet() *ast.LetStatement {
-	letToken := p.curToken
-
+func (p *Parser) parseLetStatement() *ast.LetStatement {
+	s := &ast.LetStatement{
+		Token: p.curToken,
+	}
 	p.NextToken()
-	identifier := ast.Identifier{
+	identifier := &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
 	}
+	s.Name = identifier
 
-	p.NextToken()
-	if p.curToken.Type != token.ASSIGN {
+	// assert next token is `=` before going to next token
+	if p.peekToken.Type != token.ASSIGN {
 		// error
 	}
+	p.NextToken()
 
 	p.NextToken()
-	value := p.ParseExpression()
+	value := p.parseExpression()
+	s.Value = value
 
-	s := &ast.LetStatement{
-		Token: letToken,
-		Name:  &identifier,
-		Value: value,
+	for p.curToken.Type != token.SEMICOLON {
+		p.NextToken()
 	}
+
 	return s
 }
 
-func (p *Parser) ParseExpression() ast.Expression {
+func (p *Parser) parseExpression() ast.Expression {
 	i, err := strconv.Atoi(p.curToken.Literal)
 	if err != nil {
 		// error
