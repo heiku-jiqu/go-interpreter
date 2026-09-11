@@ -61,7 +61,12 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	s := &ast.LetStatement{
 		Token: p.curToken,
 	}
-	p.NextToken()
+
+	if !p.expectPeek(token.IDENT) {
+		// error
+		p.peekTokenTypeError(token.IDENT)
+		return nil
+	}
 	identifier := &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
@@ -69,18 +74,17 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	s.Name = identifier
 
 	// assert next token is `=` before going to next token
-	if !p.peekTokenIs(token.ASSIGN) {
+	if !p.expectPeek(token.ASSIGN) {
 		// error
 		p.peekTokenTypeError(token.ASSIGN)
 		return nil
 	}
-	p.NextToken()
 
 	p.NextToken()
 	value := p.parseExpression()
 	s.Value = value
 
-	for p.curToken.Type != token.SEMICOLON {
+	for !p.curTokenIs(token.SEMICOLON) {
 		p.NextToken()
 	}
 
@@ -98,8 +102,25 @@ func (p *Parser) parseExpression() ast.Expression {
 	}
 }
 
+func (p *Parser) curTokenIs(t token.TokenType) bool {
+	return p.curToken.Type == t
+}
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
+}
+
+// expectPeek checks whether next token's type is `t` and only advances nexttoken if so while returning true.
+// else it returns false while keeping current token.
+//
+// Nearly all parsers have this method.
+func (p *Parser) expectPeek(t token.TokenType) bool {
+	if p.peekTokenIs(t) {
+		p.NextToken()
+		return true
+	} else {
+		p.peekTokenTypeError(t)
+		return false
+	}
 }
 
 // Appends error mismatch TokenType message in p.errors
