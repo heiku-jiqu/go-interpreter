@@ -28,7 +28,7 @@ func (r *Repl) Start(in io.Reader, out io.Writer) error {
 		}
 		input := scanner.Text()
 
-		lex := lexer.NewLexer(input)
+		lex := lexer.New(input)
 
 		for tok := lex.NextToken(); tok.Type != token.EOF && tok.Type != token.ILLEGAL; tok = lex.NextToken() {
 			fmt.Fprintf(out, "%+v\n", tok)

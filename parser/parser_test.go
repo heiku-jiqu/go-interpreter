@@ -13,8 +13,8 @@ let x = 5;
 let test = 69;
 let elephant = 420;
 `
-	l := lexer.NewLexer(input)
-	p := NewParser(l)
+	l := lexer.New(input)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -59,6 +59,30 @@ func testLetStatement(t *testing.T, s ast.Statement, name string, expectedVal in
 
 	if letStmtValue.Value != expectedVal {
 		t.Errorf("invalid LetStatement.Value, got %+v, expected %+v", letStmtValue.Value, expectedVal)
+	}
+}
+func TestReturnStatements(t *testing.T) {
+	input := `
+ return 5;
+ return 10;
+ return 993322;`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	}
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
+			continue
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt.TokenLiteral not 'return', got %q",
+				returnStmt.TokenLiteral())
+		}
 	}
 }
 

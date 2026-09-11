@@ -25,7 +25,7 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;`
-		lexer := NewLexer(input)
+		lexer := New(input)
 
 		expected := []token.Token{
 			{Type: token.LET, Literal: "let"},
@@ -100,7 +100,7 @@ if (5 < 10) {
 	})
 	t.Run("test symbol tokens", func(t *testing.T) {
 		input := "=+{}(),;-/*<>!"
-		lexer := NewLexer(input)
+		lexer := New(input)
 
 		expected := []token.Token{
 			{Type: token.ASSIGN, Literal: "="},
@@ -128,7 +128,7 @@ if (5 < 10) {
 	})
 	t.Run("test two char operators", func(t *testing.T) {
 		input := "10 == 10;"
-		lexer := NewLexer(input)
+		lexer := New(input)
 
 		expected := []token.Token{
 			{Type: token.INT, Literal: "10"},

@@ -9,7 +9,7 @@ type Lexer struct {
 	ch           byte // ch is the current character at index `position`
 }
 
-func NewLexer(input string) *Lexer {
+func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l

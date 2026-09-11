@@ -18,7 +18,7 @@ type Parser struct {
 	peekToken token.Token
 }
 
-func NewParser(l *lexer.Lexer) *Parser {
+func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
 		errors: []string{},
@@ -52,9 +52,21 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
+}
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	returnStmt := &ast.ReturnStatement{
+		Token: p.curToken,
+	}
+	p.NextToken()
+
+	expr := p.parseExpression()
+	returnStmt.ReturnValue = expr
+	return returnStmt
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {

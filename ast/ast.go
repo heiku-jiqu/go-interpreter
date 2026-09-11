@@ -52,3 +52,11 @@ type IntLiteral struct {
 
 func (i *IntLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntLiteral) expressionNode()      {}
+
+type ReturnStatement struct {
+	Token       token.Token // the 'return' token
+	ReturnValue Expression
+}
+
+func (r *ReturnStatement) TokenLiteral() string { return r.Token.Literal }
+func (r *ReturnStatement) statementNode()       {}
