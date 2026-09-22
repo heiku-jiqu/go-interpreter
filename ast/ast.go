@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/heiku-jiqu/go-interpreter/token"
 )
@@ -46,8 +47,8 @@ type LetStatement struct {
 	Value Expression
 }
 
-func (l *LetStatement) TokenLiteral() string { return l.Token.Literal }
 func (l *LetStatement) statementNode()       {}
+func (l *LetStatement) TokenLiteral() string { return l.Token.Literal }
 func (l *LetStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(l.TokenLiteral() + " ")
@@ -65,8 +66,8 @@ type Identifier struct {
 	Value string
 }
 
-func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) expressionNode()      {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string {
 	return i.Value
 }
@@ -76,8 +77,8 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) expressionNode()      {}
+func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) String() string {
 	return i.Token.Literal
 }
@@ -87,8 +88,8 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
-func (r *ReturnStatement) TokenLiteral() string { return r.Token.Literal }
 func (r *ReturnStatement) statementNode()       {}
+func (r *ReturnStatement) TokenLiteral() string { return r.Token.Literal }
 func (r *ReturnStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(r.TokenLiteral() + " ")
@@ -104,8 +105,8 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) statementNode()       {}
+func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
 		return es.Expression.String()
@@ -119,13 +120,32 @@ type PrefixExpression struct {
 	Right    Expression
 }
 
-func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
-func (pe *PrefixExpression) expressionNode()      {}
-func (pe *PrefixExpression) String() string {
+func (ie *PrefixExpression) expressionNode()      {}
+func (ie *PrefixExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *PrefixExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
-	out.WriteString(pe.Operator)
-	out.WriteString(pe.Right.String())
+	out.WriteString(ie.Operator)
+	out.WriteString(ie.Right.String())
 	out.WriteString(")")
 	return out.String()
+}
+
+type InfixExpression struct {
+	Token    token.Token // prefix token, e.g. +
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (pe *InfixExpression) expressionNode()      {}
+func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
+func (pe *InfixExpression) String() string {
+	var b strings.Builder
+	b.WriteString("(")
+	b.WriteString(pe.Left.String())
+	b.WriteString(" " + pe.Operator + " ")
+	b.WriteString(pe.Right.String())
+	b.WriteString(")")
+	return b.String()
 }
