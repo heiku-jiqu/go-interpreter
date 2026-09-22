@@ -1,90 +1,92 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/heiku-jiqu/go-interpreter/ast"
 	"github.com/heiku-jiqu/go-interpreter/lexer"
 )
 
-// func TestLetStatement(t *testing.T) {
-// 	input := `
-// let x = 5;
-// let test = 69;
-// let elephant = 420;
-// `
-// 	l := lexer.New(input)
-// 	p := New(l)
-// 	program := p.ParseProgram()
-// 	checkParserErrors(t, p)
+func TestLetStatement(t *testing.T) {
+	input := `
+let x = 5;
+let test = 69;
+let elephant = 420;
+`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
 
-// 	if program == nil {
-// 		t.Fatalf("ParseProgram() returned nil")
-// 	}
-// 	if len(program.Statements) != 3 {
-// 		t.Fatalf("program.Statements does not contain 3 statement. got %d statement(s)", len(program.Statements))
-// 	}
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statement. got %d statement(s)", len(program.Statements))
+	}
 
-// 	expecteds := []struct {
-// 		name string
-// 		val  int
-// 	}{
-// 		{"x", 5},
-// 		{"test", 69},
-// 		{"elephant", 420},
-// 	}
+	expecteds := []struct {
+		name string
+		val  int64
+	}{
+		{"x", 5},
+		{"test", 69},
+		{"elephant", 420},
+	}
 
-// 	for i, s := range program.Statements {
-// 		exp := expecteds[i]
-// 		testLetStatement(t, s, exp.name, exp.val)
-// 	}
-// }
+	for i, s := range program.Statements {
+		exp := expecteds[i]
+		testLetStatement(t, s, exp.name, exp.val)
+	}
+}
 
-// func testLetStatement(t *testing.T, s ast.Statement, name string, expectedVal int) {
-// 	letStmt, ok := s.(*ast.LetStatement)
-// 	if !ok {
-// 		t.Errorf("parsed statement is not a LetStatement")
-// 	}
+func testLetStatement(t *testing.T, s ast.Statement, name string, expectedVal int64) {
+	letStmt, ok := s.(*ast.LetStatement)
+	if !ok {
+		t.Errorf("parsed statement is not a LetStatement")
+	}
 
-// 	if letStmt.Name.Value != name {
-// 		t.Errorf("invalid LetStatement.Name.Value, got %s, expected %s", letStmt.Name.Value, name)
-// 	}
-// 	if letStmt.Name.TokenLiteral() != name {
-// 		t.Errorf("invalid LetStatement.Name, got %s, expected %s", letStmt.Name, name)
-// 	}
-// 	letStmtValue, ok := letStmt.Value.(*ast.IntLiteral)
-// 	if !ok {
-// 		t.Errorf("parsed RHS of LetStatement is not IntLiteral")
-// 	}
+	if letStmt.Name.Value != name {
+		t.Errorf("invalid LetStatement.Name.Value, got %s, expected %s", letStmt.Name.Value, name)
+	}
+	if letStmt.Name.TokenLiteral() != name {
+		t.Errorf("invalid LetStatement.Name, got %s, expected %s", letStmt.Name, name)
+	}
+	letStmtValue, ok := letStmt.Value.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("parsed RHS of LetStatement is not IntLiteral")
+	}
 
-// 	if letStmtValue.Value != expectedVal {
-// 		t.Errorf("invalid LetStatement.Value, got %+v, expected %+v", letStmtValue.Value, expectedVal)
-// 	}
-// }
-// func TestReturnStatements(t *testing.T) {
-// 	input := `
-//  return 5;
-//  return 10;
-//  return 993322;`
-// 	l := lexer.New(input)
-// 	p := New(l)
-// 	program := p.ParseProgram()
-// 	checkParserErrors(t, p)
-// 	if len(program.Statements) != 3 {
-// 		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
-// 	}
-// 	for _, stmt := range program.Statements {
-// 		returnStmt, ok := stmt.(*ast.ReturnStatement)
-// 		if !ok {
-// 			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
-// 			continue
-// 		}
-// 		if returnStmt.TokenLiteral() != "return" {
-// 			t.Errorf("returnStmt.TokenLiteral not 'return', got %q",
-// 				returnStmt.TokenLiteral())
-// 		}
-// 	}
-// }
+	if letStmtValue.Value != expectedVal {
+		t.Errorf("invalid LetStatement.Value, got %+v, expected %+v", letStmtValue.Value, expectedVal)
+	}
+}
+
+func TestReturnStatements(t *testing.T) {
+	input := `
+ return 5;
+ return 10;
+ return 993322;`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	}
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
+			continue
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt.TokenLiteral not 'return', got %q",
+				returnStmt.TokenLiteral())
+		}
+	}
+}
 
 func checkParserErrors(t *testing.T, p *Parser) {
 	t.Helper()
@@ -152,4 +154,58 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	if literal.TokenLiteral() != "5" {
 		t.Errorf("ident.TokenLiteral not %s. got=%s", "foobar", literal.TokenLiteral())
 	}
+}
+
+func TestParsingPrefixExpressions(t *testing.T) {
+	prefixTests := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!5;", "!", 5},
+		{"-15;", "-", 15},
+	}
+	for _, tt := range prefixTests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+		exp, ok := stmt.Expression.(*ast.PrefixExpression)
+		if !ok {
+			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Expression)
+		}
+		if exp.Operator != tt.operator {
+			t.Fatalf("exp.Operator is not '%s'. got=%s",
+				tt.operator, exp.Operator)
+		}
+		if !testIntegerLiteral(t, exp.Right, tt.integerValue) {
+			return
+		}
+	}
+}
+
+func testIntegerLiteral(t *testing.T, input ast.Expression, expected int64) bool {
+	integ, ok := input.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("input is not *ast.IntegerLiteral. got=%T", input)
+		return false
+	}
+	if integ.Value != expected {
+		t.Errorf("integ.Value not %d. got=%d", expected, integ.Value)
+		return false
+	}
+	if integ.TokenLiteral() != fmt.Sprintf("%d", expected) {
+		t.Errorf("integ.TokenLiteral not %d. got=%s", expected,
+			integ.TokenLiteral())
+		return false
+	}
+	return true
 }

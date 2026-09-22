@@ -51,6 +51,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
 	return p
 }
@@ -89,8 +91,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 	p.NextToken()
 
-	expr := p.parseExpression(LOWEST)
-	returnStmt.ReturnValue = expr
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.NextToken()
+	}
 	return returnStmt
 }
 
@@ -140,6 +143,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefixFn := p.prefixParseFns[p.curToken.Type]
 	if prefixFn == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 	leftExp := prefixFn()
@@ -162,7 +166,16 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		Token: p.curToken,
 		Value: val,
 	}
-
+}
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	prefixTok := p.curToken
+	p.NextToken()
+	right := p.parseExpression(PREFIX)
+	return &ast.PrefixExpression{
+		Token:    prefixTok,
+		Operator: prefixTok.Literal,
+		Right:    right,
+	}
 }
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
@@ -201,4 +214,9 @@ func (p *Parser) registerPrefix(t token.TokenType, f prefixParseFn) {
 
 func (p *Parser) registerInfix(t token.TokenType, f infixParseFn) {
 	p.infixParseFns[t] = f
+}
+
+func (p *Parser) noPrefixParseFnError(t token.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	p.errors = append(p.errors, msg)
 }
