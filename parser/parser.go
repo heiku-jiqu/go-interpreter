@@ -65,6 +65,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
+	p.registerPrefix(token.IF, p.parseIfExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -126,7 +127,6 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	if !p.expectPeek(token.IDENT) {
 		// error
-		p.peekTokenTypeError(token.IDENT)
 		return nil
 	}
 	identifier := &ast.Identifier{
@@ -138,7 +138,6 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	// assert next token is `=` before going to next token
 	if !p.expectPeek(token.ASSIGN) {
 		// error
-		p.peekTokenTypeError(token.ASSIGN)
 		return nil
 	}
 
@@ -221,8 +220,49 @@ func (p *Parser) parseBoolean() ast.Expression {
 		Token: p.curToken,
 		Value: val,
 	}
-
 }
+func (p *Parser) parseIfExpression() ast.Expression {
+	ifToken := p.curToken
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+	p.NextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	consequenceBlockStatement := p.parseBlockStatement()
+
+	return &ast.IfExpression{
+		Token:       ifToken,
+		Condition:   exp,
+		Consequence: consequenceBlockStatement,
+	}
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	bs := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: []ast.Statement{},
+	}
+	p.NextToken()
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			bs.Statements = append(bs.Statements, stmt)
+		}
+		p.NextToken()
+	}
+	return bs
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	prefixTok := p.curToken
 	p.NextToken()
@@ -238,7 +278,6 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.NextToken() // consume LPAREN
 	exp := p.parseExpression(LOWEST)
 	if !p.expectPeek(token.RPAREN) {
-		p.peekTokenTypeError(token.RPAREN)
 		return nil
 	}
 	return exp
