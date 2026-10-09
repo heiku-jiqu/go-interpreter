@@ -64,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -161,6 +162,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
+// TODO: invariant should be everytime parseX runs, p.curToken is an UNPARSED token!
+// similarly, try to refactor to LL(1) without the need for peekToken.
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefixFn := p.prefixParseFns[p.curToken.Type]
 	if prefixFn == nil {
@@ -229,6 +232,16 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		Operator: prefixTok.Literal,
 		Right:    right,
 	}
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.NextToken() // consume LPAREN
+	exp := p.parseExpression(LOWEST)
+	if !p.expectPeek(token.RPAREN) {
+		p.peekTokenTypeError(token.RPAREN)
+		return nil
+	}
+	return exp
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
