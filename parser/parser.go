@@ -237,14 +237,22 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	if !p.expectPeek(token.LBRACE) {
 		return nil
 	}
-
 	consequenceBlockStatement := p.parseBlockStatement()
-
-	return &ast.IfExpression{
+	ifExp := &ast.IfExpression{
 		Token:       ifToken,
 		Condition:   exp,
 		Consequence: consequenceBlockStatement,
 	}
+
+	if p.peekTokenIs(token.ELSE) { // don't use expectPeek to prevent adding parse error
+		p.NextToken()
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+		ifExp.Alternative = p.parseBlockStatement()
+	}
+
+	return ifExp
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
