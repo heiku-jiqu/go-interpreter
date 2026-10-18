@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/heiku-jiqu/go-interpreter/lexer"
-	"github.com/heiku-jiqu/go-interpreter/token"
+	"github.com/heiku-jiqu/go-interpreter/parser"
 )
 
 const PROMPT = ">> "
@@ -29,9 +29,21 @@ func (r *Repl) Start(in io.Reader, out io.Writer) error {
 		input := scanner.Text()
 
 		lex := lexer.New(input)
+		p := parser.New(lex)
 
-		for tok := lex.NextToken(); tok.Type != token.EOF && tok.Type != token.ILLEGAL; tok = lex.NextToken() {
-			fmt.Fprintf(out, "%+v\n", tok)
+		prog := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
 		}
+
+		io.WriteString(out, prog.String())
+		io.WriteString(out, "\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	io.WriteString(out, " parser errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
