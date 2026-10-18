@@ -34,6 +34,7 @@ func (r *Repl) Start(in io.Reader, out io.Writer) error {
 		prog := p.ParseProgram()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
+			continue
 		}
 
 		io.WriteString(out, prog.String())
